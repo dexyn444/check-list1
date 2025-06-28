@@ -3,148 +3,61 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Checklist Semanal</title>
-  <meta name="theme-color" content="#3498db" />
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f2f2f2;
-      margin: 20px;
-    }
-    h1 {
-      text-align: center;
-      color: #3498db;
-    }
-    .btn-clear {
-      background-color: #e74c3c;
-      color: white;
-      border: none;
-      padding: 10px 15px;
-      border-radius: 5px;
-      cursor: pointer;
-      margin-bottom: 20px;
-    }
-    .day {
-      background: white;
-      padding: 15px;
-      margin-bottom: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-    .task {
-      margin: 5px 0;
-    }
-    span.edit {
-      cursor: pointer;
-      margin-left: 10px;
-      color: #2980b9;
-    }
-  </style>
+  <title>Lista de Compras</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- Ícone para iOS -->
+<link rel="apple-touch-icon" href="icon-192.png" />
+<!-- Cor da barra de status no Safari -->
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<!-- Ativar tela cheia ao abrir como app -->
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<link rel="manifest" href="manifest.json" />
+<link rel="apple-touch-icon" href="icon-180.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+
 </head>
 <body>
-  <h1>Checklist Semanal</h1>
-  <button class="btn-clear" onclick="limparChecklist()">Limpar Checklist</button>
-  <div id="checklist"></div>
+  <div class="container">
+    <h1>🛒 Lista de Compras de Mercado</h1>
+    <div class="telas">
+      
+      <!-- Tela da esquerda: Sugestões -->
+      <div class="sugestoes">
+        <h2>📦 Sugestões</h2>
+        <ul id="produtos"></ul>
+      </div>
 
-  <script>
-    const checklist = document.getElementById("checklist");
+      <!-- Tela da direita: Itens selecionados -->
+      <div class="lista">
+        <h2>✅ Minha Lista</h2>
+        <ul id="listaCompras"></ul>
+        <button onclick="limparLista()">Limpar Lista</button>
+    </div>
+   
+</div>
+<div class="adicionar-manual">
+    <input type="text" id="inputManual" placeholder="Digite um produto..." />
+    <button onclick="adicionarProdutoManual()">Adicionar</button>
+  </div>
+</div>
+  </div>
+  <button id="modoToggle" onclick="alternarModo()">🌙 Modo Escuro</button>
+  <button class="btn-pequeno whatsapp" onclick="enviarWhatsApp()" title="Enviar pelo WhatsApp">
+    <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/whatsapp.svg" alt="WhatsApp" class="icon">
+  </button>
+  <div id="loader">
+  <div class="bouncing-loader">
+    <div></div><div></div><div></div>
+  </div>
+</div>
+
+
+
+
   
-    let tarefas = JSON.parse(localStorage.getItem("tarefas")) || {
-      "Segunda-feira": ["Ler a Bíblia", "Fazer exercício", "Beber 3 litros de água"],
-      "Terça-feira": ["Meditar", "Fazer exercício", "Beber 3 litros de água"],
-      "Quarta-feira": ["Ler um livro", "Fazer exercício", "Beber 3 litros de água"],
-      "Quinta-feira": ["Estudar algo novo", "Fazer exercício", "Beber 3 litros de água"],
-      "Sexta-feira": ["Organizar tarefas", "Fazer exercício", "Beber 3 litros de água"],
-      "Sábado": ["Caminhar ao ar livre", "Relaxar", "Beber 3 litros de água"],
-      "Domingo": ["Tempo com família", "Fazer exercício", "Beber 3 litros de água"]
-    };
+
   
-    function salvarTarefas() {
-      localStorage.setItem("tarefas", JSON.stringify(tarefas));
-    }
-  
-    function criarChecklist() {
-      checklist.innerHTML = "";
-      for (let dia in tarefas) {
-        const dayDiv = document.createElement("div");
-        dayDiv.className = "day";
-  
-        const title = document.createElement("h2");
-        title.innerHTML = `${dia} <span class="edit" onclick="editarTarefas('${dia}')">✏️ Editar</span>`;
-        dayDiv.appendChild(title);
-  
-        tarefas[dia].forEach(tarefa => {
-          const taskDiv = document.createElement("div");
-          taskDiv.className = "task";
-  
-          const checkbox = document.createElement("input");
-          checkbox.type = "checkbox";
-          const id = `${dia}-${tarefa}`;
-          checkbox.id = id;
-          checkbox.checked = localStorage.getItem(id) === "true";
-  
-          checkbox.addEventListener("change", () => {
-            localStorage.setItem(id, checkbox.checked);
-          });
-  
-          const label = document.createElement("label");
-          label.htmlFor = id;
-          label.textContent = tarefa;
-  
-          taskDiv.appendChild(checkbox);
-          taskDiv.appendChild(label);
-          dayDiv.appendChild(taskDiv);
-        });
-  
-        checklist.appendChild(dayDiv);
-      }
-    }
-  
-    function editarTarefas(dia) {
-      const tarefasAtuais = tarefas[dia].join("\n");
-      const novaLista = prompt(`Edite as tarefas para ${dia} (uma por linha):`, tarefasAtuais);
-  
-      if (novaLista !== null) {
-        tarefas[dia] = novaLista.split("\n").map(t => t.trim()).filter(t => t);
-        salvarTarefas();
-        criarChecklist();
-      }
-    }
-  
-    function limparChecklist() {
-      for (let dia in tarefas) {
-        tarefas[dia].forEach(tarefa => {
-          const id = `${dia}-${tarefa}`;
-          localStorage.removeItem(id);
-        });
-      }
-      criarChecklist();
-    }
-  
-    criarChecklist();
-  
-    // 🟡 Notificação Push - Beber água
-    function solicitarPermissaoNotificacao() {
-      if ('Notification' in window) {
-        Notification.requestPermission().then(permissao => {
-          if (permissao === 'granted') {
-            agendarNotificacoesAgua();
-          }
-        });
-      }
-    }
-  
-    function agendarNotificacoesAgua() {
-      setInterval(() => {
-        new Notification("🚰 Lembrete", {
-          body: "Hora de beber água!",
-          icon: "icon-192.png" // certifique-se de ter esse ícone no projeto
-        });
-      }, 60 * 60 * 1000); // a cada 1 hora
-    }
-  
-    solicitarPermissaoNotificacao();
-  </script>
-  
+  <script src="script.js"></script>
 </body>
 </html>
